@@ -82,8 +82,8 @@ def getUserInfo() -> tuple[int, float, float]:
         print(f"* POIDS : {poids}Kg")
 
         print("\nVous voulez continuer ou modifier les informations ?")
-        valid = input("(n/N) pour modifier, *any pour continuer : ")
-        if valid not in ["n", "N"]:
+        valid = input("(o/O) pour modifier, *any pour continuer : ")
+        if valid not in ["o", "O"]:
             break
 
     return sexe, taille, poids
