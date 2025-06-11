@@ -1,6 +1,7 @@
 """Projet Docteur Virtuel incorporant le calcul de l'IMC: Indice de Masse Corporel"""
-from ast import Return
+
 import os
+import json
 
 SEX: dict[int, str] = {
     1: "Masculin",
@@ -33,6 +34,71 @@ QUALIFICATIONS: dict[int, str] = {
     5: "Obésité sévère",
     6: "Obésité morbide ou massive"
 }
+
+
+def connexion() -> dict[str, str | int | float]:
+    if os.name == "nt":
+        os.system("cls")
+    elif os.name == "linux":
+        os.system("clear")
+
+    print("\n\t\t---------------------------------")
+    print("\t\t|     Projet Docteur Virtuel\t|")
+    print("\t\t---------------------------------")
+
+    print("\n\tBienvenue sur notre plateforme de consultation medicale virtuelle")
+
+    while True:
+        print("\nVeuillez vous connecter à la plateforme")
+        print("[1] - Se connecter")
+        print("[2] - S'inscrire")
+
+        try:
+            user_choice: int = int(input("Veuillez faire un choix : "))
+            if user_choice == 1:
+                return {}
+            elif user_choice == 2:
+                user: dict[str, str | int | float] = createUser()
+                print(
+                    "\nVeuillez compléter votre inscription en fournissant certaines informations supplémentaires")
+                sex, taille, poids = getUserInfo()
+                bmi = computeBMI(taille, poids)
+                user["sex"] = sex
+                user["height"] = taille
+                user["weight"] = poids
+                user["ideal_weight"] = computePoidsIdeal(taille, sex)
+                user["BMI"] = bmi
+                user["qualification"] = getQualification(bmi)
+                return user
+            else:
+                print("Veuillez faire un choix entre [1] et [2]")
+                continue
+        except:
+            print("Saisie incorrecte, veuillez réessayer !")
+            continue
+
+
+def createUser() -> dict:
+    print("\n\tCREATION D'UN NOUVEAU COMPTE UTILISATEUR\n")
+    nom: str = input("Votre nom : ").upper()
+    prenoms: str = input("Votre (Vos) prénom(s) : ")
+    age: int = int(input("Votre âge : "))
+    profession: str = input("Votre profession : ")
+    email: str = input("Votre adresse email : ")
+    country: str = input("Votre pays d'origine : ")
+    location: str = input("Votre lieu de résidence : ")
+
+    user: dict[str, str | int] = {
+        "surname": nom,
+        "names": prenoms,
+        "age": age,
+        "profession": profession,
+        "email": email,
+        "country": country,
+        "location": location,
+    }
+    print("\n\tVotre compte a été créé avec succès")
+    return user
 
 
 def getUserInfo() -> tuple[int, float, float]:
@@ -114,24 +180,22 @@ def getQualification(bmi: float) -> int:
         return 0
 
 
+def updateUser():
+    ...
+
+
+def deleteUser():
+    ...
+
+
 def main() -> None:
-    if os.name == "nt":
-        os.system("cls")
-    elif os.name == "linux":
-        os.system("clear")
+    user: dict[str, str | int | float] = connexion()
 
-    print("\n\t\t---------------------------------")
-    print("\t\t|     Projet Docteur Virtuel\t|")
-    print("\t\t---------------------------------")
-
-    sexe, taille, poids = getUserInfo()
-    poids_ideal = computePoidsIdeal(taille, sexe)
-    bmi = computeBMI(taille, poids)
-    qualification = getQualification(bmi)
     print("\n\n\tRESULTATS DE L'ANALYSE")
-    print(f"\t* Votre poids idéal est : {poids_ideal}Kg")
-    print("\t* Votre Indice de Masse Corporel (IMC) est :", bmi)
-    print("\t* APPRECIATION :", QUALIFICATIONS[qualification], "\n")
+    print(f"\t* Votre poids idéal est : {user.get("ideal_weight")}Kg")
+    print("\t* Votre Indice de Masse Corporel (IMC) est :", user.get("BMI"))
+    qualification: int = user.get("qualification", 0)   # type:ignore
+    print(f"\t* APPRECIATION : {QUALIFICATIONS[qualification]}\n")
 
 
 if __name__ == "__main__":
