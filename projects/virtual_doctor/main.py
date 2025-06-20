@@ -3,6 +3,8 @@
 import os
 import json
 
+ROOT_PATH = r"D:\PROJECTS\ORIGINALS\PYTHON_CODING_SESSIONS\projects\virtual_doctor\database"
+
 SEX: dict[int, str] = {
     1: "Masculin",
     2: "Féminin"
@@ -69,6 +71,7 @@ def connexion() -> dict[str, str | int | float]:
                 user["ideal_weight"] = computePoidsIdeal(taille, sex)
                 user["BMI"] = bmi
                 user["qualification"] = getQualification(bmi)
+                addUser(user)
                 return user
             else:
                 print("Veuillez faire un choix entre [1] et [2]")
@@ -80,6 +83,7 @@ def connexion() -> dict[str, str | int | float]:
 
 def createUser() -> dict:
     print("\n\tCREATION D'UN NOUVEAU COMPTE UTILISATEUR\n")
+    id: int = 0
     nom: str = input("Votre nom : ")
     prenoms: str = input("Votre (Vos) prénom(s) : ")
     while True:
@@ -105,7 +109,20 @@ def createUser() -> dict:
     country = validateName(country, "Unknown")
     location = validateName(location, "Unknown")
 
+    try:
+        with open(f"{ROOT_PATH}\\id_increment.json", "r") as id_increment:
+            last_id: dict = json.load(id_increment)
+
+        id = last_id["increment"] + 1
+        last_id["increment"] += 1
+
+        with open(f"{ROOT_PATH}\\id_increment.json", "w") as id_increment:
+            json.dump(last_id, id_increment, indent=4)
+    except Exception as e:
+        print(e)
+
     user: dict[str, str | int] = {
+        "id": id,
         "surname": nom,
         "names": prenoms,
         "age": age,
@@ -124,12 +141,27 @@ def validateName(name: str, default: str, email: bool = False) -> str:
     else:
         if email:
             return name
-        elif (name.replace(" ", "").isalpha() |
+        elif (name.strip().isalpha() |
               name.replace("-", "").isalpha() |
               name.replace(" ", "").replace("-", "").isalpha()):
             return name
         else:
             return default
+
+
+def addUser(user: dict) -> None:
+    try:
+        with open(f"{ROOT_PATH}\\users.json", "r") as all_users:
+            users: list = json.load(all_users)
+    except Exception as e:
+        print(e)
+
+    try:
+        with open(f"{ROOT_PATH}\\users.json", "w") as all_users:
+            users.append(user)
+            json.dump(users, all_users, indent=4)
+    except Exception as e:
+        print(e)
 
 
 def getUserInfo() -> tuple[int, float, float]:
@@ -228,6 +260,7 @@ def showUserInfos(user: dict[str, str | int | float]) -> None:
     print(f"\t* {"Poids":30s} : {user.get("weight")}Kg")
     print(f"\t* {"Poids Idéal":30s} : {user.get("ideal_weight")}Kg")
     print(f"\t* {"IMC (Indce de Masse Corporel)":30s} : {user.get("BMI")}")
+    print(f"{287.459939824724:.2f}")
 
     print(f"\t* {"APPRECIATION":30s} : {QUALIFICATIONS[qualification]}\n")
 
