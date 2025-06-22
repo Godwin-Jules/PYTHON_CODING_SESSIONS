@@ -277,7 +277,7 @@ def getQualification(bmi: float) -> int:
 def showUserInfos(user: dict[str, str | int | float]) -> None:
     qualification: int = user.get("qualification", 0)  # type:ignore
 
-    print("\n\n\tAFFICHAGE DES INFORMATIONS UTILISATEUR")
+    print("\n\n\tAFFICHAGE DES INFORMATIONS UTILISATEUR\n")
     print(f"\t* {"Nom":30s} : {user.get("surname")}")
     print(f"\t* {"Prénom(s)":30s} : {user.get("names")}")
     print(f"\t* {"Sexe":30s} : {SEX[user.get("sex")]}")   # type:ignore
@@ -304,7 +304,7 @@ def showUserInfo(user: dict[str, str | int | float]) -> None:
     print(f"\t* APPRECIATION : {QUALIFICATIONS[qualification]}\n")
 
 
-def updateUser():
+def updateUser(user: dict[str, str | int | float]) -> bool:
     ...
 
 
@@ -323,8 +323,41 @@ def main() -> None:
             clear = False
             continue
         else:
+            break
+
+    while True:
+
+        print("\n\tQuelle opération voulez-vous effectuer sur cette plateforme ?")
+        print("\nVeuillez faire un choix parmi le menu ci-après")
+
+        print("[1] - Consulter ses informations médicales")
+        print("[2] - Consulter toutes ses informations personnelles")
+        print("[3] - Modifier ses informations personnelles")
+        print("[4] - Se déconnecter")
+
+        while True:
+            try:
+                user_choice = int(input("\nQuel est votre choix : "))
+                if user_choice < 1 and user_choice > 4:
+                    print("\nChoix incorrect, faire un choix entre [1] et [4]")
+                break
+            except Exception as e:
+                print("\n\tSaisie incorrecte :", e)
+                continue
+
+        if user_choice == 1:
             showUserInfo(user)
+        elif user_choice == 2:
             showUserInfos(user)
+        elif user_choice == 3:
+            response = updateUser(user)
+            if response:
+                print("Mise à jour effectuée avec succès")
+            else:
+                print("Erreur lors de la mise à jour de l'utilisateur")
+        elif user_choice == 4:
+            print(
+                "\n\n\t---------- MERCI DE VOTRE VISITE SUR LA PLATEFORME \"VIRTUAL DOCTOR\" ----------\n")
             break
 
 
