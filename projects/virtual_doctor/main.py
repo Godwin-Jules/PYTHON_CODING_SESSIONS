@@ -38,17 +38,18 @@ QUALIFICATIONS: dict[int, str] = {
 }
 
 
-def connexion() -> dict[str, str | int | float]:
-    if os.name == "nt":
-        os.system("cls")
-    elif os.name == "linux":
-        os.system("clear")
+def connexion(clear: bool) -> dict[str, str | int | float]:
+    if clear:
+        if os.name == "nt":
+            os.system("cls")
+        elif os.name == "linux":
+            os.system("clear")
 
-    print("\n\t\t---------------------------------")
-    print("\t\t|     Projet Docteur Virtuel\t|")
-    print("\t\t---------------------------------")
+        print("\n\t\t---------------------------------")
+        print("\t\t|     Projet Docteur Virtuel\t|")
+        print("\t\t---------------------------------")
 
-    print("\n\tBienvenue sur notre plateforme de consultation medicale virtuelle")
+        print("\n\tBienvenue sur notre plateforme de consultation medicale virtuelle")
 
     while True:
         print("\nVeuillez vous connecter à la plateforme")
@@ -58,7 +59,29 @@ def connexion() -> dict[str, str | int | float]:
         try:
             user_choice: int = int(input("Veuillez faire un choix : "))
             if user_choice == 1:
-                return {}
+                users: list = getJsonFileContent("users.json")  # type:ignore
+                if len(users) == 0:
+                    print("\n\t(0) utilisateur enregistré dans la base de données")
+                    print("\tVeuillez créer un compte")
+                    return {}
+                else:
+                    print(
+                        f"\n\t\tListe de tous les utilisateurs enregistrés dans la base de données : ({len(users)})\n")
+                    for index, user in enumerate(users):
+                        print(
+                            f"\t{index + 1} - {user["surname"]} {user["names"]}")
+
+                    while True:
+                        try:
+                            print(
+                                "\nSaisir le numéro correspondant à votre identité")
+                            choice = int(input("Veuillez faire un choix : "))
+                            if choice < 1:
+                                continue
+                            user = users[choice - 1]
+                            return user
+                        except Exception as e:
+                            print("Saisie incorrecte, veuillez reprendre.", e, "\n")
             elif user_choice == 2:
                 user: dict[str, str | int | float] = createUser()
                 print(
@@ -103,23 +126,16 @@ def createUser() -> dict:
     location: str = input("Votre lieu de résidence : ")
 
     nom = validateName(nom, "unknown").upper()
-    prenoms = validateName(prenoms, "guest").capitalize()
+    prenoms = validateName(prenoms, "guest").title()
     profession = validateName(profession, "unknown").upper()
     email = validateName(email, "unknown", True).lower()
-    country = validateName(country, "Unknown")
-    location = validateName(location, "Unknown")
+    country = validateName(country, "Unknown").title()
+    location = validateName(location, "Unknown").title()
 
-    try:
-        with open(f"{ROOT_PATH}\\id_increment.json", "r") as id_increment:
-            last_id: dict = json.load(id_increment)
-
-        id = last_id["increment"] + 1
-        last_id["increment"] += 1
-
-        with open(f"{ROOT_PATH}\\id_increment.json", "w") as id_increment:
-            json.dump(last_id, id_increment, indent=4)
-    except Exception as e:
-        print(e)
+    last_id: dict = getJsonFileContent("id_increment.json")  # type:ignore
+    id = last_id["increment"] + 1
+    last_id["increment"] += 1
+    updateJsonFileContent("id_increment.json", last_id)
 
     user: dict[str, str | int] = {
         "id": id,
@@ -150,18 +166,33 @@ def validateName(name: str, default: str, email: bool = False) -> str:
 
 
 def addUser(user: dict) -> None:
-    try:
-        with open(f"{ROOT_PATH}\\users.json", "r") as all_users:
-            users: list = json.load(all_users)
-    except Exception as e:
-        print(e)
+    users: list = getJsonFileContent("users.json")  # type:ignore
+    users.append(user)
+    response = updateJsonFileContent("users.json", users)
+    if response:
+        print("Utilisateur enregistré avec succès dans la base de données")
+    else:
+        print("Erreur lors de l'enregistrement de l'utilisateur")
 
+
+def getJsonFileContent(relative_path: str) -> dict | list | None:
     try:
-        with open(f"{ROOT_PATH}\\users.json", "w") as all_users:
-            users.append(user)
-            json.dump(users, all_users, indent=4)
+        with open(f"{ROOT_PATH}\\{relative_path}", "r") as jsonFile:
+            content: dict | list = json.load(jsonFile)
+            return content
     except Exception as e:
-        print(e)
+        print("Erreur lors de la lecture du fichier :", e)
+        return None
+
+
+def updateJsonFileContent(relative_path: str, content: list | dict) -> bool:
+    try:
+        with open(f"{ROOT_PATH}\\{relative_path}", "w") as jsonFile:
+            json.dump(content, jsonFile, indent=4)
+            return True
+    except Exception as e:
+        print("Erreur lors de l'écriture dans le ficher :", e)
+        return False
 
 
 def getUserInfo() -> tuple[int, float, float]:
@@ -260,7 +291,6 @@ def showUserInfos(user: dict[str, str | int | float]) -> None:
     print(f"\t* {"Poids":30s} : {user.get("weight")}Kg")
     print(f"\t* {"Poids Idéal":30s} : {user.get("ideal_weight")}Kg")
     print(f"\t* {"IMC (Indce de Masse Corporel)":30s} : {user.get("BMI")}")
-    print(f"{287.459939824724:.2f}")
 
     print(f"\t* {"APPRECIATION":30s} : {QUALIFICATIONS[qualification]}\n")
 
@@ -269,8 +299,8 @@ def showUserInfo(user: dict[str, str | int | float]) -> None:
     qualification: int = user.get("qualification", 0)   # type:ignore
 
     print("\n\n\tRESULTATS DE L'ANALYSE")
-    print(f"\t* Votre poids idéal est : {user.get("ideal_weight")}Kg")
-    print("\t* Votre Indice de Masse Corporel (IMC) est :", user.get("BMI"))
+    print(f"\t* Votre poids idéal est : {user.get("ideal_weight", 0)}Kg")
+    print("\t* Votre Indice de Masse Corporel (IMC) est :", user.get("BMI", 0))
     print(f"\t* APPRECIATION : {QUALIFICATIONS[qualification]}\n")
 
 
@@ -283,10 +313,19 @@ def deleteUser():
 
 
 def main() -> None:
-    user: dict[str, str | int | float] = connexion()
 
-    showUserInfo(user)
-    showUserInfos(user)
+    # Récupération des données utilisateur grâce au processus de connexion à la plateforme "Virtual Doctor"
+    clear = True
+    while True:
+        user: dict[str, str | int | float] = connexion(clear)
+        if len(user) == 0:
+            print("\nVeuillez vous connecter à la plateforme avant de continuer\n")
+            clear = False
+            continue
+        else:
+            showUserInfo(user)
+            showUserInfos(user)
+            break
 
 
 if __name__ == "__main__":
