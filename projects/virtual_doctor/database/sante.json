@@ -1,0 +1,75 @@
+[
+    {
+        "id": 1,
+        "diag": "Sous poids",
+        "reasons": [
+            "Sous alimentation"
+        ],
+        "counsels": [
+            "Plus d'alimentation"
+        ]
+    },
+    {
+        "id": 2,
+        "diag": "Poids normal",
+        "reasons": [
+            "Vous prenez soin de notre ligne"
+        ],
+        "counsels": [
+            "Contunez comme cela"
+        ]
+    },
+    {
+        "id": 3,
+        "diag": "Surpoids",
+        "reasons": [
+            "Mauvaise alimentation"
+        ],
+        "counsels": [
+            "Consommer moins gras",
+            "Faites un peu de sport",
+            "Pratiquer le je\u00fbne intermittant"
+        ]
+    },
+    {
+        "id": 4,
+        "diag": "Ob\u00e9sit\u00e9",
+        "reasons": [
+            "Mauvaise alimentation",
+            "Manque d'activit\u00e9 physique"
+        ],
+        "counsels": [
+            "Consommer moins gras",
+            "Faites un peu de sport",
+            "Pratiquer le je\u00fbne intermittant"
+        ]
+    },
+    {
+        "id": 5,
+        "diag": "Ob\u00e9sit\u00e9 s\u00e9v\u00e8re",
+        "reasons": [
+            "Mauvaise alimentation",
+            "Manque d'activit\u00e9 physique"
+        ],
+        "counsels": [
+            "Consommer moins gras",
+            "Faites un peu de sport",
+            "Pratiquer le je\u00fbne intermittant",
+            "Demander un suivi chez un Nutritioniste"
+        ]
+    },
+    {
+        "id": 6,
+        "diag": "Ob\u00e9sit\u00e9 morbide",
+        "reasons": [
+            "Mauvaise alimentation",
+            "Manque d'activit\u00e9 physique"
+        ],
+        "counsels": [
+            "Consommer moins gras",
+            "Faites un peu de sport",
+            "Pratiquer le je\u00fbne intermittant",
+            "Songer \u00e0 une intervention bariatrique"
+        ]
+    }
+]

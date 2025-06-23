@@ -10,33 +10,6 @@ SEX: dict[int, str] = {
     2: "Féminin"
 }
 
-# QUALITIES: dict[int, str] = {
-#     1: "IMC € ]*, 18.5[",
-#     2: "IMC € [18.5, 25[",
-#     3: "IMC € [25, 30[",
-#     4: "IMC € [30, 35[",
-#     5: "IMC € [35, 40[",
-#     6: "IMC € [40, *[",
-# }
-
-QUALITIES: dict[int, str] = {
-    1: "** < IMC < 18.5",
-    2: "18.5 < IMC < 25",
-    3: "25 < IMC < 30",
-    4: "30 < IMC < 35",
-    5: "35 < IMC < 40",
-    6: "40 < IMC < **",
-}
-
-QUALIFICATIONS: dict[int, str] = {
-    1: "Maigreur, Sous-poids",
-    2: "Corpulence normale",
-    3: "Surpoids",
-    4: "Obésité (modérée)",
-    5: "Obésité sévère",
-    6: "Obésité morbide ou massive"
-}
-
 
 def connexion(clear: bool) -> dict[str, str | int | float]:
     if clear:
@@ -276,6 +249,7 @@ def getQualification(bmi: float) -> int:
 
 def showUserInfos(user: dict[str, str | int | float]) -> None:
     qualification: int = user.get("qualification", 0)  # type:ignore
+    medical_data: dict[str, str] = getMedicalData(qualification)  # type:ignore
 
     print("\n\n\tAFFICHAGE DES INFORMATIONS UTILISATEUR\n")
     print(f"\t* {"Nom":30s} : {user.get("surname")}")
@@ -292,16 +266,59 @@ def showUserInfos(user: dict[str, str | int | float]) -> None:
     print(f"\t* {"Poids Idéal":30s} : {user.get("ideal_weight")}Kg")
     print(f"\t* {"IMC (Indce de Masse Corporel)":30s} : {user.get("BMI")}")
 
-    print(f"\t* {"APPRECIATION":30s} : {QUALIFICATIONS[qualification]}\n")
+    print(f"\n\t* {"DIAGNOSTIC":30s} :  {medical_data["diag"].title()}")
+
+    if len(medical_data["reasons"]) == 1:
+        print(f"\t* {"RAISON(S)":30s} :  {medical_data["reasons"][0]}")
+    else:
+        print(f"\t* {"RAISON(S)":30s} :_  {medical_data["reasons"][0]}")
+        for reason in medical_data["reasons"][1:]:
+            print(f"\t{" ":32s} |_ {reason}")
+        print()
+
+    if len(medical_data["counsels"]) == 1:
+        print(f"\t* {"CONSEIL(S)":30s} :  {medical_data["counsels"][0]}")
+    else:
+        print(f"\t* {"CONSEIL(S)":30s} :_ {medical_data["counsels"][0]}")
+        for counsel in medical_data["counsels"][1:]:
+            print(f"\t{" ":32s} |_ {counsel}")
+    print("\n")
 
 
 def showUserInfo(user: dict[str, str | int | float]) -> None:
     qualification: int = user.get("qualification", 0)   # type:ignore
+    medical_data: dict[str, str] = getMedicalData(qualification)  # type:ignore
 
-    print("\n\n\tRESULTATS DE L'ANALYSE")
-    print(f"\t* Votre poids idéal est : {user.get("ideal_weight", 0)}Kg")
-    print("\t* Votre Indice de Masse Corporel (IMC) est :", user.get("BMI", 0))
-    print(f"\t* APPRECIATION : {QUALIFICATIONS[qualification]}\n")
+    if medical_data != None:
+        print("\n\n\tRESULTATS DE L'ANALYSE")
+        print(f"\t* Votre poids idéal est : {user.get("ideal_weight", 0)}Kg")
+        print("\t* Votre Indice de Masse Corporel (IMC) est :", user.get("BMI", 0))
+        print(f"\t* DIAGNOSTIC :  {medical_data["diag"].title()}")
+
+        if len(medical_data["reasons"]) == 1:
+            print(f"\t* RAISON(S)  :  {medical_data["reasons"][0]}")
+        else:
+            print(f"\t* RAISON(S)  :_ {medical_data["reasons"][0]}")
+            for reason in medical_data["reasons"][1:]:
+                print(f"\t{" ":12s} |_ {reason}")
+            print()
+
+        if len(medical_data["counsels"]) == 1:
+            print(f"\t* CONSEIL(S) :  {medical_data["counsels"][0]}")
+        else:
+            print(f"\t* CONSEIL(S) :_ {medical_data["counsels"][0]}")
+            for counsel in medical_data["counsels"][1:]:
+                print(f"\t{" ":12s} |_ {counsel}")
+        print("\n")
+
+
+def getMedicalData(qualification_id: int) -> dict[str, str] | None:
+    medical_data: list[dict[str, str]] = getJsonFileContent(
+        "sante.json")  # type:ignore
+    for data in medical_data:
+        if data.get("id") == qualification_id:
+            return data
+    return None
 
 
 def updateUser(user: dict[str, str | int | float]) -> bool:
@@ -479,6 +496,8 @@ def main() -> None:
                 break
             else:
                 print("\nErreur lors de la suppression du compte utilisateur")
+        else:
+            print("Choix incorrect, veuillez reprendre !")
 
 
 if __name__ == "__main__":
