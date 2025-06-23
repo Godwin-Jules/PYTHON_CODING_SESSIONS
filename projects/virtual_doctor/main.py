@@ -305,7 +305,95 @@ def showUserInfo(user: dict[str, str | int | float]) -> None:
 
 
 def updateUser(user: dict[str, str | int | float]) -> bool:
-    ...
+    print("\n\tMISE A JOUR DES DONNEES UTILISATEUR\n")
+    print("Voici vos données actuelles dans notre base de données", sep="")
+    showUserInfos(user)
+    print("\nVeuillez remplir seulement le champ des informations à modifier\n")
+
+    id: int = user.get("id")  # type:ignore
+    nom = validateName(input("Votre nom : "), user.get(
+        "surname")).upper()  # type:ignore
+
+    prenoms = validateName(input("Votre (Vos) prénom(s) : "),
+                           user.get("names")).title()  # type:ignore
+
+    try:
+        age: int = int(input("Votre âge : "))
+        if age < 0:
+            print("L'âge est toujours supérieur ou égal à 0")
+            age = user.get("age")  # type:ignore
+    except:
+        age = user.get("age")  # type:ignore
+
+    profession = validateName(input("Votre profession : "), user.get(
+        "profession")).upper()  # type:ignore
+
+    email = validateName(input("Votre adresse email : "),
+                         user.get("email"), True).lower()  # type:ignore
+
+    country = validateName(input("Votre pays d'origine : "),
+                           user.get("country")).title()  # type:ignore
+
+    location = validateName(input("Votre lieu de résidence : "), user.get(
+        "location")).title()  # type:ignore
+
+    try:
+        print("\n\t[1] - Masculin")
+        print("\t[2] - Féminin")
+        sexe = int(input("Votre sexe (1 ou 2) : "))
+        if (sexe not in [1, 2]):
+            sexe: int = user.get("sex")  # type:ignore
+    except:
+        sexe: int = user.get("sex")  # type:ignore
+
+    try:
+        taille = float(input("Veuillez votre taille (en cm) : "))
+        if (taille <= 0):
+            taille: float = user.get("height")  # type:ignore
+    except:
+        taille: float = user.get("height")  # type:ignore
+
+    try:
+        poids = float(input("Veuillez votre poids (en Kg) : "))
+        if (poids <= 0):
+            poids: float = user.get("weight")  # type:ignore
+    except:
+        poids: float = user.get("weight")  # type:ignore
+
+    bmi: float = computeBMI(taille, poids)
+
+    print("\nÊtes-vous sûr de modifier ces informations ?")
+
+    if input("(o/O) pour modifier, *any pour continuer : ") not in ["o", "O"]:
+        return False
+    else:
+        user["surname"] = nom
+        user["names"] = prenoms
+        user["age"] = age
+        user["profession"] = profession
+        user["email"] = email
+        user["country"] = country
+        user["location"] = location
+        user["sex"] = sexe
+        user["height"] = taille
+        user["weight"] = poids
+        user["ideal_weight"] = computePoidsIdeal(taille, sexe)
+        user["BMI"] = bmi
+        user["qualification"] = getQualification(bmi)
+
+        users: list = getJsonFileContent("users.json")  # type:ignore
+        index = 0
+        for idx, el in enumerate(users):
+            if el.get("id") == id:
+                index = idx
+                break
+        users[index] = user
+        response = updateJsonFileContent("users.json", users)
+        if response:
+            showUserInfos(users[index])
+        else:
+            print("Modification non enregistrée")
+        return True
 
 
 def deleteUser():
