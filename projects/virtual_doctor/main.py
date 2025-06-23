@@ -381,7 +381,7 @@ def updateUser(user: dict[str, str | int | float]) -> bool:
         user["BMI"] = bmi
         user["qualification"] = getQualification(bmi)
 
-        users: list = getJsonFileContent("users.json")  # type:ignore
+        users: list[dict] = getJsonFileContent("users.json")  # type:ignore
         index = 0
         for idx, el in enumerate(users):
             if el.get("id") == id:
@@ -390,14 +390,37 @@ def updateUser(user: dict[str, str | int | float]) -> bool:
         users[index] = user
         response = updateJsonFileContent("users.json", users)
         if response:
+            print("\n\tModification enregistrée avec succès !")
             showUserInfos(users[index])
+            return True
         else:
-            print("Modification non enregistrée")
-        return True
+            print("\nModification non enregistrée")
+            return False
 
 
-def deleteUser():
-    ...
+def deleteUser(user: dict[str, str | int | float]) -> bool:
+    id: int = user.get("id")  # type:ignore
+    print("\nÊtes-vous sûr de supprimer votre compte ainsi que toutes vos données peresonnelles ?")
+
+    if input("(o/O) pour supprimer, *any pour continuer : ") not in ["o", "O"]:
+        print("Suppression du compte utilisateur annulée")
+        return False
+    else:
+        users: list = getJsonFileContent("users.json")  # type:ignore
+        index = 0
+        for idx, el in enumerate(users):
+            if el.get("id") == id:
+                index = idx
+                break
+        users.pop(index)
+        response = updateJsonFileContent("users.json", users)
+        if response:
+            showUserInfos(user)
+            print("\nSuppression de votre compte effectuée avec succès")
+            return True
+        else:
+            print("Erreur lors de la suppression du compte utilisateur")
+            return False
 
 
 def main() -> None:
@@ -422,6 +445,7 @@ def main() -> None:
         print("[2] - Consulter toutes ses informations personnelles")
         print("[3] - Modifier ses informations personnelles")
         print("[4] - Se déconnecter")
+        print("[5] - Supprimer votre compte")
 
         while True:
             try:
@@ -442,11 +466,19 @@ def main() -> None:
             if response:
                 print("Mise à jour effectuée avec succès")
             else:
-                print("Erreur lors de la mise à jour de l'utilisateur")
+                print(
+                    "\nLa mise à jour de vos données personnelles s'est terminée avec échec, veuillez reprendre")
         elif user_choice == 4:
             print(
                 "\n\n\t---------- MERCI DE VOTRE VISITE SUR LA PLATEFORME \"VIRTUAL DOCTOR\" ----------\n")
             break
+        elif user_choice == 5:
+            response = deleteUser(user)
+            if response:
+                print("\nVotre compte a été supprimé\n\tVeuillez vous connecter !")
+                break
+            else:
+                print("\nErreur lors de la suppression du compte utilisateur")
 
 
 if __name__ == "__main__":
